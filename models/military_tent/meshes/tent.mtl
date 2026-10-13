@@ -1,0 +1,32 @@
+# MTL for Gazebo — BaseColor maps only (normal/roughness/metallic maps left out
+# to avoid the lumpy ogre2 artifacts seen before). Kd 1 1 1 so the albedo map
+# is not darkened. Textures renamed space-free for reliable parsing.
+
+newmtl Green_Leather
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+illum 2
+map_Kd GreenLeather_BaseColor.png
+
+newmtl Metal
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.2 0.2 0.2
+illum 2
+map_Kd Metal_BaseColor.png
+
+newmtl Yarn
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+illum 2
+map_Kd Yarn_BaseColor.png
+
+newmtl Glass
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.3 0.3 0.3
+d 0.55
+illum 2
+map_Kd Glass_BaseColor.png

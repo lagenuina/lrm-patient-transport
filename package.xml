@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>field_hospital_simulation</name>
+  <version>0.0.1</version>
+  <description>
+    Gazebo Sim (Fortress) simulation of an outbreak field hospital for testing the
+    risk_maps risk-aware navigation stack. Provides a wheelchair robot
+    model, a generated field-hospital world, and ground-truth perception nodes
+    that stand in for SegFormer (terrain) and RTAB-Map (obstacles) so the
+    elevation / fusion / global / local pipeline runs unmodified in sim.
+  </description>
+  <maintainer email="genua.l@northeastern.edu">Lorena Genua</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+
+  <exec_depend>risk_maps</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <!-- Gazebo Sim (Fortress): ros_gz_sim/bridge + ignition fortress -->
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>ros_gz_image</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

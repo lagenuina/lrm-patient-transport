@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <model name="military_tent">
+    <static>true</static>
+    <link name="link">
+      <!-- OBJ is Y-up, in metres, ~6.9 (x) x 3.1 (y=up) x 11.6 (z=long).
+           rpy (roll +90, yaw +90) brings it Z-up with the long axis along world
+           X; the x/y/z offset recentres the footprint on the origin and drops
+           the base to z=0. Footprint ends up ~11.6 (x) x 6.9 (y), ~3.1 m tall.
+           Tweak rpy if it looks mis-oriented; <scale> to resize.
+           (yaw -1.5708 + y -3.46 flips the entrance to the opposite side.) -->
+      <visual name="visual">
+        <pose>0 -3.46 -1.56 1.5708 0 -1.5708</pose>
+        <geometry>
+          <mesh><uri>meshes/tent.obj</uri><scale>1 1 1</scale></mesh>
+        </geometry>
+      </visual>
+      <!-- No collision here: the tent is enterable. Collision/obstacle is the
+           tentwall_* boxes generated in field_hospital_scene (perimeter walls
+           with a door gap). -->
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,17 @@
+# MTL for Gazebo. BaseColor only: the original normal/roughness/metalness maps
+# made the canvas render lumpy/wrong under ogre2, so only map_Kd is used and
+# Kd is 1 1 1 (the exporter's Kd 0 0 0 would multiply the albedo to black).
+
+newmtl Tent2_UDIM_1001
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+illum 1
+map_Kd Tent2_v01_EXP_1001_BaseColor.png
+
+newmtl Tent2_UDIM_1002
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+illum 1
+map_Kd Tent2_v01_EXP_1002_BaseColor.png

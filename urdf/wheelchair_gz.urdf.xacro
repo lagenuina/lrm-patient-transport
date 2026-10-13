@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<!--
+  wheelchair_gz.urdf.xacro — Gazebo Sim (Fortress) variant of the wheelchair.
+
+  Identical kinematics/frames/mounting to wheelchair.urdf.xacro (so the TF tree
+  and GT alignment are unchanged), but the Gazebo Classic gazebo_ros plugins are
+  replaced by Ignition/Fortress system plugins + gz sensors. All gz topics are
+  bridged to ROS by ros_gz_bridge (see config/ros_gz_bridge.yaml):
+
+      DiffDrive   cmd_vel (ROS->gz), odom + odom->base_link TF (gz->ROS /tf)
+      JointState  joint_states (gz->ROS)
+      rgbd_camera camera_0X/{image,depth_image,camera_info}
+      gpu_lidar   scan
+-->
+<robot name="wheelchair" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Footprint shrunk ~15% from the original 1.00 x 0.66 m so the chair clears
+       the tent entrance more easily; the visual mesh is scaled to match (see
+       <mesh scale> below). Vertical geometry (wheel_r, body_z/zc) is unchanged
+       so ground contact and odometry are unaffected. -->
+  <xacro:property name="mesh_scale" value="0.85"/>
+  <xacro:property name="body_x"   value="0.85"/>
+  <xacro:property name="body_y"   value="0.56"/>
+  <xacro:property name="body_z"   value="0.55"/>
+  <xacro:property name="body_zc"  value="0.45"/>
+  <xacro:property name="wheel_r"  value="0.15"/>
+  <xacro:property name="wheel_w"  value="0.07"/>
+  <xacro:property name="wheel_sep" value="0.52"/>
+  <xacro:property name="caster_x" value="0.33"/>
+  <xacro:property name="PI" value="3.14159265359"/>
+
+  <material name="chair">  <color rgba="0.15 0.18 0.22 1.0"/></material>
+  <material name="rubber"> <color rgba="0.05 0.05 0.05 1.0"/></material>
+
+  <link name="base_link">
+    <!-- Visual: PatientWheelChair mesh (Z-up, metres, base at z=0, centred).
+         Flip rpy yaw to 3.14159 if it faces backwards. Collision stays a box
+         and the diff-drive wheels/casters below are collision-only (no visual)
+         so the mesh's own wheels are what you see. -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="model://PatientWheelChair/meshes/PatientWheelChair.obj"
+              scale="${mesh_scale} ${mesh_scale} ${mesh_scale}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${body_zc}" rpy="0 0 0"/>
+      <geometry><box size="${body_x} ${body_y} ${body_z}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${body_zc}" rpy="0 0 0"/>
+      <mass value="80.0"/>
+      <inertia ixx="6.0" ixy="0" ixz="0" iyy="9.0" iyz="0" izz="9.0"/>
+    </inertial>
+  </link>
+
+  <xacro:macro name="drive_wheel" params="prefix y">
+    <!-- Functional drive wheel: collision-only (the wheelchair mesh provides
+         the visible wheels). Still rotated by the diff-drive plugin. -->
+    <link name="${prefix}_wheel">
+      <collision>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry><cylinder radius="${wheel_r}" length="${wheel_w}"/></geometry>
+      </collision>
+      <inertial><mass value="2.0"/>
+        <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.02" iyz="0" izz="0.03"/></inertial>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="0 ${y} ${wheel_r}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+  <xacro:drive_wheel prefix="left"  y="${ wheel_sep/2}"/>
+  <xacro:drive_wheel prefix="right" y="${-wheel_sep/2}"/>
+
+  <xacro:macro name="caster" params="prefix x">
+    <link name="${prefix}_caster">
+      <collision><geometry><sphere radius="${wheel_r}"/></geometry>
+        <surface><friction><ode><mu>0.0</mu><mu2>0.0</mu2></ode></friction></surface></collision>
+      <inertial><mass value="1.0"/>
+        <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/></inertial>
+    </link>
+    <joint name="${prefix}_caster_joint" type="fixed">
+      <parent link="base_link"/><child link="${prefix}_caster"/>
+      <origin xyz="${x} 0 ${wheel_r}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+  <xacro:caster prefix="front" x="${ caster_x}"/>
+  <xacro:caster prefix="back"  x="${-caster_x}"/>
+
+  <!-- ============ RGB-D cameras (gz rgbd_camera sensor) ============ -->
+  <xacro:macro name="rgbd_camera" params="name x y z pitch hfov">
+    <link name="${name}_link">
+      <visual><geometry><box size="0.03 0.10 0.03"/></geometry><material name="rubber"/></visual>
+      <inertial><mass value="0.1"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/></inertial>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="base_link"/><child link="${name}_link"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 ${pitch} 0"/>
+    </joint>
+    <link name="${name}_color_optical_frame"/>
+    <joint name="${name}_optical_joint" type="fixed">
+      <parent link="${name}_link"/><child link="${name}_color_optical_frame"/>
+      <origin xyz="0 0 0" rpy="${-PI/2} 0 ${-PI/2}"/>
+    </joint>
+    <gazebo reference="${name}_link">
+      <sensor name="${name}" type="rgbd_camera">
+        <update_rate>10</update_rate>
+        <always_on>1</always_on>
+        <topic>${name}</topic>
+        <ignition_frame_id>${name}_color_optical_frame</ignition_frame_id>
+        <camera>
+          <horizontal_fov>${hfov}</horizontal_fov>
+          <image><width>424</width><height>240</height><format>R8G8B8</format></image>
+          <clip><near>0.2</near><far>8.0</far></clip>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+  <xacro:rgbd_camera name="camera_01" x="-0.05" y="-0.27" z="0.36" pitch="0.30" hfov="1.20"/>
+  <xacro:rgbd_camera name="camera_02" x="-0.05" y="0.27"  z="0.40" pitch="0.30" hfov="1.20"/>
+
+  <!-- ============ 2D lidar (gz gpu_lidar) ============ -->
+  <link name="lidar_link">
+    <visual><geometry><cylinder radius="0.04" length="0.05"/></geometry><material name="chair"/></visual>
+    <inertial><mass value="0.1"/>
+      <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/></inertial>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/><child link="lidar_link"/>
+    <origin xyz="0.45 0 0.30" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="gpu_lidar">
+      <update_rate>10</update_rate>
+      <always_on>1</always_on>
+      <topic>scan</topic>
+      <ignition_frame_id>lidar_link</ignition_frame_id>
+      <lidar>
+        <scan><horizontal>
+          <samples>360</samples><resolution>1</resolution>
+          <min_angle>-3.14159</min_angle><max_angle>3.14159</max_angle>
+        </horizontal></scan>
+        <range><min>0.15</min><max>10.0</max><resolution>0.01</resolution></range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <!-- ============ Fortress system plugins ============ -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-diff-drive-system"
+            name="ignition::gazebo::systems::DiffDrive">
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>${wheel_sep}</wheel_separation>
+      <wheel_radius>${wheel_r}</wheel_radius>
+      <max_linear_acceleration>2.0</max_linear_acceleration>
+      <topic>/cmd_vel</topic>
+      <!-- DiffDrive still publishes its WHEEL-ENCODER odometry, but on a side
+           topic — it is NOT used for localisation. The planner/RViz localise
+           off ground-truth instead (OdometryPublisher below), so the RViz
+           chair is the actual Gazebo body, not a kinematic estimate that
+           drifts away from it. -->
+      <odom_topic>/wheel_odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <tf_topic>/tf_gz</tf_topic>
+    </plugin>
+    <!-- Ground-truth odometry: derived from the model's true world pose (not
+         the wheels), so /odom == where the chair actually is. Bridged to ROS
+         /odom and turned into odom->base_link by odom_tf_node, keeping the
+         reliable Odometry->TF path (the gz Pose_V -> /tf bridge was flaky). -->
+    <plugin filename="ignition-gazebo-odometry-publisher-system"
+            name="ignition::gazebo::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <odom_topic>/odom</odom_topic>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <dimensions>2</dimensions>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-state-publisher-system"
+            name="ignition::gazebo::systems::JointStatePublisher">
+      <topic>/joint_states</topic>
+    </plugin>
+  </gazebo>
+
+</robot>

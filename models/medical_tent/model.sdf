@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <model name="medical_tent">
+    <static>true</static>
+    <link name="link">
+      <!-- Mesh is Y-up, arbitrary units, and its footprint is NOT centred on
+           the origin. scale 0.30 -> ~6.95 x 6.82 m footprint, ~2.72 m tall.
+           roll +90 deg (1.5708) brings Y-up to Z-up; the x/-y translation
+           recentres the footprint on the origin so instances line up.
+           Adjust <scale> to resize; if it sits off-centre, tweak the pose x/y. -->
+      <visual name="visual">
+        <pose>-0.615 0.57 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh><uri>meshes/Tent_2.obj</uri><scale>0.30 0.30 0.30</scale></mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 1.42 0 0 0</pose>
+        <geometry><box><size>6.95 6.82 2.72</size></box></geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

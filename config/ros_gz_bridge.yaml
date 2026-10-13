@@ -1,0 +1,76 @@
+# ros_gz_bridge parameter_bridge config — maps Fortress (gz) topics <-> ROS 2.
+# Loaded by ros_gz_bridge in field_hospital_gz.launch.py.
+#
+# If your ros_gz version rejects these keys, check the gz topic names with
+#   ign topic -l
+# and note some builds use ign_topic_name/ign_type_name instead of gz_*.
+
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "ignition.msgs.Clock"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/cmd_vel"
+  gz_topic_name: "/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "ignition.msgs.Twist"
+  direction: ROS_TO_GZ
+
+# /odom now carries GROUND-TRUTH odometry from the OdometryPublisher system on
+# the wheelchair (the model's true world pose), NOT the DiffDrive wheel encoders
+# (those go to /wheel_odom and are unused for localisation). This keeps the RViz
+# chair and the planner's pose locked to the actual Gazebo body instead of a
+# kinematic estimate that drifts away from it.
+- ros_topic_name: "/odom"
+  gz_topic_name: "/odom"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "ignition.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+# NOTE: odom->base_link TF is NOT bridged from gz Pose_V (it was flaky and the
+# planner kept losing the pose). Instead odom_tf_node broadcasts it from /odom.
+
+- ros_topic_name: "/joint_states"
+  gz_topic_name: "/joint_states"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "ignition.msgs.Model"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/scan"
+  gz_topic_name: "/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "ignition.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+# --- Cameras (optional; comment out if you don't need the RGB-D streams) ---
+- ros_topic_name: "/camera_01/image"
+  gz_topic_name: "/camera_01/image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "ignition.msgs.Image"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/camera_01/depth_image"
+  gz_topic_name: "/camera_01/depth_image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "ignition.msgs.Image"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/camera_01/camera_info"
+  gz_topic_name: "/camera_01/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "ignition.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/camera_02/image"
+  gz_topic_name: "/camera_02/image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "ignition.msgs.Image"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/camera_02/depth_image"
+  gz_topic_name: "/camera_02/depth_image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "ignition.msgs.Image"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/camera_02/camera_info"
+  gz_topic_name: "/camera_02/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "ignition.msgs.CameraInfo"
+  direction: GZ_TO_ROS

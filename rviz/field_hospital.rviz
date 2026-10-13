@@ -1,0 +1,117 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Tool Properties
+    Name: Tool Properties
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Color: 160; 160; 164
+      Plane Cell Count: 60
+      Reference Frame: map
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: true
+      Show Names: true
+      Show Axes: true
+      Marker Scale: 1.0
+    - Class: rviz_default_plugins/RobotModel
+      Name: RobotModel
+      Enabled: true
+      Description Topic:
+        Value: /robot_description
+      Visual Enabled: true
+    - Class: rviz_default_plugins/Map
+      Name: Elevation/Contamination risk
+      Enabled: true
+      Topic:
+        Value: /risk/elevation
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+      Color Scheme: costmap
+      Draw Behind: true
+      Alpha: 0.7
+    - Class: rviz_default_plugins/Map
+      Name: Terrain risk
+      Enabled: true
+      Topic:
+        Value: /risk/terrain
+        Durability Policy: Volatile
+      Color Scheme: costmap
+      Alpha: 0.6
+    - Class: rviz_default_plugins/Map
+      Name: Obstacles (octomap_grid)
+      Enabled: true
+      Topic:
+        Value: /octomap_grid
+        Durability Policy: Volatile
+      Color Scheme: map
+      Alpha: 0.6
+    - Class: rviz_default_plugins/Map
+      Name: Fused risk (raw)
+      Enabled: false
+      Topic:
+        Value: /risk_fused
+        Durability Policy: Volatile
+      Color Scheme: costmap
+      Alpha: 0.8
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Fused risk (yellow→red)
+      Enabled: true
+      Topic:
+        Value: /risk_fused_viz
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+    - Class: rviz_default_plugins/Path
+      Name: Global path
+      Enabled: true
+      Topic:
+        Value: /global_path
+      Color: 25; 255; 0
+      Line Width: 0.08
+    - Class: rviz_default_plugins/Path
+      Name: Local path (MPPI)
+      Enabled: true
+      Topic:
+        Value: /local_path
+      Color: 255; 170; 0
+      Line Width: 0.05
+    - Class: rviz_default_plugins/Pose
+      Name: Target
+      Enabled: true
+      Topic:
+        Value: /target_pose
+      Color: 255; 25; 0
+    - Class: rviz_default_plugins/LaserScan
+      Name: Lidar
+      Enabled: false
+      Topic:
+        Value: /scan
+      Size (m): 0.05
+  Global Options:
+    Fixed Frame: map
+    Background Color: 48; 48; 48
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Value: /goal_pose
+    - Class: rviz_default_plugins/Select
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Name: Current View
+      Target Frame: base_link
+      Distance: 35
+      Focal Point:
+        X: 11.0
+        Y: 0.0
+        Z: 0.0
+      Pitch: 1.2
+      Yaw: 3.14
+Window Geometry:
+  Height: 900
+  Width: 1500
